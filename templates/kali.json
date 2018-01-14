@@ -14,7 +14,7 @@
         "iso_url": "kali-linux-2017.3-amd64.iso",
         "iso_checksum": "395bc0af107806e5bf06edc6ac4af1f96caaf04f465831abf2f33ce51b73968d",
         "iso_checksum_type": "sha256",
-        "vm_name": "{{user `vm_name`}}",
+        "vm_name": "{{user `box_name`}}",
         "vmx_data": {
             "memsize": 2048,
             "numvcpus": 2
@@ -30,7 +30,7 @@
             " debian-installer=en_US",
             " locale=en_US",
             " keymap=us",
-            " hostname={{user `vm_name`}}",
+            " hostname={{user `box_name`}}",
             " domain=",
             "<enter>"
         ],
@@ -39,15 +39,16 @@
     "provisioners": [{
         "type": "shell",
         "scripts": [
-            "scripts/common/linux/apt.sh",
-            "scripts/common/linux/vagrant.sh",
-            "scripts/common/linux/cleanup.sh"
+            "scripts/common/linux/vagrant.sh"
         ],
         "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
     }],
     "post-processors": [{
+        "type": "vagrant",
         "keep_input_artifact": false,
-        "output": "{{user `vm_name`}}.box",
-        "type": "vagrant"
+        "output": "build/{{user `box_name`}}.box",
+        "compression_level": 6,
+        "include": "build/metadata.json",
+        "vagrantfile_template": "build/Vagrantfile"
     }]
 }
