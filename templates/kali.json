@@ -1,9 +1,8 @@
 {
     "variables": {
-        "vm_name": "vagrant",
-        "disk_size": "40960",
         "box_name" : "vagrant-vmware-kali-rolling-amd64",
         "box_desc" : "Kali Rolling x64 Desktop",
+        "disk_size": "40960",
         "root_username": "root",
         "root_password": "toor",
         "preseed": "https://raw.githubusercontent.com/InfamousSYN/packer/master/include/preseed/kali-preseed.cfg"
