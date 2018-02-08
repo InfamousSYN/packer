@@ -1,6 +1,6 @@
 {
     "variables": {
-        "box_name" : "vagrant-vmware-kali-rolling-amd64",
+        "box_name" : "vagrant-kali-rolling-amd64",
         "box_desc" : "Kali Rolling x64 Desktop",
         "disk_size": "40960",
         "account_name": "",
@@ -8,19 +8,50 @@
         "box_version": "",
         "root_username": "root",
         "root_password": "toor",
-        "preseed": "https://raw.githubusercontent.com/InfamousSYN/packer/master/include/preseed/kali-preseed.cfg"
+        "preseed": "https://raw.githubusercontent.com/InfamousSYN/packer/master/include/preseed/kali-preseed.cfg",
+        "iso_url": "kali-linux-2017.3-amd64.iso",
+        "iso_checksum": "395bc0af107806e5bf06edc6ac4af1f96caaf04f465831abf2f33ce51b73968d",
+        "iso_checksum_type": "sha256"
     },
     "description": "{{user `box_desc`}}",
     "builders":[{
         "type": "vmware-iso",
-        "iso_url": "kali-linux-2017.3-amd64.iso",
-        "iso_checksum": "395bc0af107806e5bf06edc6ac4af1f96caaf04f465831abf2f33ce51b73968d",
-        "iso_checksum_type": "sha256",
+        "iso_url": "{{user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum`}}",
+        "iso_checksum_type": "{{user `iso_checksum_type`}}",
         "vm_name": "{{user `box_name`}}",
         "vmx_data": {
             "memsize": 2048,
-            "numvcpus": 2
+            "numvcpus": 2,
+            "usb.present": "True",
+            "usb.pcislotnumber": "34"
         },
+        "ssh_username": "{{user `root_username`}}",
+        "ssh_password": "{{user `root_password`}}",
+        "ssh_timeout": "1000000s",
+        "boot_command": [
+            "<esc><wait5>",
+            "install",
+            " auto",
+            " url={{user `preseed`}}",
+            " debian-installer=en_US",
+            " locale=en_US",
+            " keymap=us",
+            " hostname={{user `box_name`}}",
+            " domain=",
+            "<enter>"
+        ],
+        "shutdown_command": "shutdown -P now"
+    },{
+        "type": "virtualbox-iso",
+        "iso_url": "{{user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum`}}",
+        "iso_checksum_type": "{{user `iso_checksum_type`}}",
+        "vm_name": "{{user `box_name`}}",
+        "vboxmanage": [
+            ["modifyvm", "{{.Name}}", "--memory", "2048"],
+            ["modifyvm", "{{.Name}}", "--cpus", "2"]
+        ],
         "ssh_username": "{{user `root_username`}}",
         "ssh_password": "{{user `root_password`}}",
         "ssh_timeout": "1000000s",
@@ -39,7 +70,23 @@
         "shutdown_command": "shutdown -P now"
     }],
     "provisioners": [{
+        "type":"shell",
+        "inline":[
+            "sleep 30",
+            "sudo apt --assume-yes update",
+            "sudo apt --assume-yes dist-upgrade"
+        ]
+    },{
         "type": "shell",
+        "only": ["vmware-iso"],
+        "scripts": [
+            "scripts/common/linux/vagrant.sh",
+            "scripts/common/linux/vmtools.sh"
+        ],
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    },{
+        "type": "shell",
+        "only": ["virtualbox-iso"],
         "scripts": [
             "scripts/common/linux/vagrant.sh"
         ],
@@ -48,15 +95,30 @@
     "post-processors": [[{
         "type": "vagrant",
         "keep_input_artifact": false,
-        "output": "build/{{user `box_name`}}.box",
+        "output": "build/{{.Name}}.box",
         "compression_level": 6,
         "include": "build/metadata.json",
         "vagrantfile_template": "build/Vagrantfile"
     },
     {
+        "type":"checksum",
+        "checksum_types":"sha256",
+        "output":"build/checksum"
+    },
+    {
         "type":"vagrant-cloud",
+        "only": ["vmware-iso"],
         "access_token":"{{user `cloud_key`}}",
-        "box_tag":"{{user `account_name`}}/{{user `box_name`}}",
-        "version":"{{user `box_version`}}"
+        "box_tag":"{{user `account_name`}}/{{.Name}}",
+        "version":"{{user `box_version`}}",
+        "version_description":"build/{{.checksum}}"
+    },
+    {
+        "type":"vagrant-cloud",
+        "only": ["virtualbox-iso"],
+        "access_token":"{{user `cloud_key`}}",
+        "box_tag":"{{user `account_name`}}/{{.Name}}",
+        "version":"{{user `box_version`}}",
+        "version_description":"build/{{.checksum}}"
     }]]
 }
