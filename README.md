@@ -1,13 +1,27 @@
 Packer
 =========
-Packer is used to automated the building and inital provisioning of a Vagrant base box (.box) in a consistent and streamline manner. 
+Packer is used to automated the building and inital provisioning of a Vagrant base box (.box) in a consistent and streamline manner. This repositories aims to provide users with a clean and easy packer environment for the automation in building base boxes. 
+
+Selecting A Packer Build
+-----
+Many of the packer templates support multiple packer builders. This is because there are slight differences in setting up a virtual machines for each of the supported providers. 
+
+The below example will result in packer only building a vagrant base box using the `vmware-iso` builder.
+```
+packer build -only=vmware-iso templates/kali.json
+```
+
+The below example will result in packer only building a vagrant base box using the `virtualbox-iso` builder.
+```
+packer build -only=virtualbox-iso templates/kali.json
+```
 
 Local Instance Workflow
 ------
 This workflow is aimed at describing the process of using packer to build a Vagrant base box to then add to your local Vagrant box library for later use.
 1. Download the packer repository
 2. Copy supporting Vagrant .box file artifacts
-3. Edit support Vagrant .box file artifacts to match specific requirements.
+3. Edit support Vagrant .box file artifacts to match specific requirements. *Note: There is a Vagrantfile copy for Windows and Linux for both vmware_workstation and virtualbox providers. Likewise, there is a metadata.json for each of the supported vagrant providers.*
 	* Change Vagrant provider in metadata.json file
 	* Change box name in Vagrantfile
 4. Edit changes in template based on specific user requirements you might have.
@@ -18,9 +32,9 @@ This workflow is aimed at describing the process of using packer to build a Vagr
 ```
 git clone https://github.com/InfamousSYN/packer.git
 cd ./packer
-cp ./inclue/vagrant/metadata.json ./build/metadata.json 			# edit as required
-cp ./include/vagrant/linux/Vagrantfile ./build/Vagrantfile 			# edit as required
-edit ./templates/kali.json 											# edit as required
+cp ./inclue/vagrant/metadata/virtualbox/metadata.json ./build/metadata.json 					# edit as required
+cp ./include/vagrant/Vagrantfile/virtualbox/windows/Vagrantfile ./build/Vagrantfile 			# edit as required
+edit ./templates/kali.json 																		# edit as required
 packer validate templates/kali.json
 packer build templates/kali.json
 vagrant box add ./build/{{box_name}}.box --name {{box_name}}
@@ -29,10 +43,11 @@ vagrant box add ./build/{{box_name}}.box --name {{box_name}}
 Distributed Vagrant Box Workflow
 ------
 This workflow is aimed at describing the process of using packer to build a Vagrant base box which is then uploaded to a Vagrant Cloud account to be publicly distributed across the internet.
+
 *Note: Any packer template within this repository with the suffix of '-cloud' will attempt to upload the produced .box file to a configured Vagrant Cloud account.*
 1. Download the packer repository
 2. Copy supporting Vagrant .box file artifacts
-3. Edit support Vagrant .box file artifacts to match specific requirements.
+3. Edit support Vagrant .box file artifacts to match specific requirements. *Note: There is a Vagrantfile copy for Windows and Linux for both vmware_workstation and virtualbox providers. Likewise, there is a metadata.json for each of the supported vagrant providers.*
 	* Change Vagrant provider in metadata.json file
 	* Change box name in Vagrantfile
 4. Edit changes in template based on specific user requirements you might have.
@@ -47,12 +62,12 @@ For more information on the specifics of the `vagrant-cloud` post-processor work
 ```
 git clone https://github.com/InfamousSYN/packer.git
 cd ./packer
-cp ./inclue/vagrant/metadata.json ./build/metadata.json 			# edit as required
-cp ./include/vagrant/linux/Vagrantfile ./build/Vagrantfile 			# edit as required
-edit ./templates/kali-cloud.json 									# edit as required
+cp ./inclue/vagrant/metadata/virtualbox/metadata.json ./build/metadata.json 					# edit as required
+cp ./include/vagrant/Vagrantfile/virtualbox/windows/Vagrantfile ./build/Vagrantfile 			# edit as required
+edit ./templates/kali.json 																		# edit as required
 packer validate templates/kali-cloud.json
 packer build templates/kali-cloud.json
 vagrant box add {{account_name}}/{{box_name}}
 ```
 
-Periodlically I will upload Vagrant base boxes to my Vagrant Cloud repository, these boxes can be publicly accessed and downloaded from here: [https://app.vagrantup.com/ainfamoussyn](https://app.vagrantup.com/ainfamoussyn)
+Periodically I will upload Vagrant base boxes to my Vagrant Cloud repository, these boxes can be publicly accessed and downloaded from here: [https://app.vagrantup.com/ainfamoussyn](https://app.vagrantup.com/ainfamoussyn)
