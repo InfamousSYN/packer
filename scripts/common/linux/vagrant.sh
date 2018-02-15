@@ -1,7 +1,8 @@
 #!/bin/sh -eux
 
-# create standard vagrant user
-useradd -d /home/vagrant -s /bin/bash -p $(echo 'vagrant' | openssl passwd -1 -stdin) vagrant
+# create standard vagrant user and then set password
+useradd -d /home/vagrant -m -s /bin/bash vagrant
+echo "vagrant:vagrant" |chpasswd
 
 # set root user's password to vagrant
 echo "root:vagrant" | chpasswd
