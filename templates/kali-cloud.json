@@ -5,12 +5,12 @@
         "disk_size": "40960",
         "account_name": "",
         "cloud_key": "",
-        "box_version": "",
+        "box_version": "1.0.0",
         "root_username": "root",
         "root_password": "toor",
         "preseed": "https://raw.githubusercontent.com/InfamousSYN/packer/master/include/preseed/kali-preseed.cfg",
-        "iso_url": "kali-linux-2017.3-amd64.iso",
-        "iso_checksum": "395bc0af107806e5bf06edc6ac4af1f96caaf04f465831abf2f33ce51b73968d",
+        "iso_url": "kali-linux-2018.1-amd64.iso",
+        "iso_checksum": "ed88466834ceeba65f426235ec191fb3580f71d50364ac5131daec1bf976b317",
         "iso_checksum_type": "sha256"
     },
     "description": "{{user `box_desc`}}",
@@ -73,10 +73,10 @@
         "type":"shell",
         "inline":[
             "sleep 30",
-            "sudo apt --assume-yes update",
-            "sudo apt --assume-yes dist-upgrade"
+            "apt update"
         ]
-    },{
+    },
+    {
         "type": "shell",
         "only": ["vmware-iso"],
         "scripts": [
@@ -95,30 +95,15 @@
     "post-processors": [[{
         "type": "vagrant",
         "keep_input_artifact": false,
-        "output": "build/{{.Name}}.box",
+        "output": "build/{{user `box_name`}}.box",
         "compression_level": 6,
         "include": "build/metadata.json",
         "vagrantfile_template": "build/Vagrantfile"
     },
     {
-        "type":"checksum",
-        "checksum_types":"sha256",
-        "output":"build/checksum"
-    },
-    {
         "type":"vagrant-cloud",
-        "only": ["vmware-iso"],
         "access_token":"{{user `cloud_key`}}",
-        "box_tag":"{{user `account_name`}}/{{.Name}}",
-        "version":"{{user `box_version`}}",
-        "version_description":"build/{{.checksum}}"
-    },
-    {
-        "type":"vagrant-cloud",
-        "only": ["virtualbox-iso"],
-        "access_token":"{{user `cloud_key`}}",
-        "box_tag":"{{user `account_name`}}/{{.Name}}",
-        "version":"{{user `box_version`}}",
-        "version_description":"build/{{.checksum}}"
+        "box_tag":"{{user `account_name`}}/{{user `box_name`}}",
+        "version":"{{user `box_version`}}"
     }]]
 }
