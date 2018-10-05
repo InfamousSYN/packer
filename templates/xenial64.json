@@ -1,0 +1,150 @@
+{
+    "variables": {
+        "box_name" : "vagrant-xenial64",
+        "box_desc" : "Ubuntu 16.04 GNOME Desktop AMD64",
+        "disk_size": "40960",
+        "username": "vagrant",
+        "password": "vagrant"
+    },
+    "description": "{{user `box_desc`}}",
+    "_comment": "A server iso is used to allow for an unattended install",
+    "builders":[{
+        "type": "vmware-iso",
+        "iso_url": "{{user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum`}}",
+        "iso_checksum_type": "{{user `iso_checksum_type`}}",
+        "vm_name": "{{user `box_name`}}",
+        "vmx_data": {
+            "memsize": 2048,
+            "numvcpus": 2
+        },
+        "ssh_username": "{{user `username`}}",
+        "ssh_password": "{{user `password`}}",
+        "ssh_timeout": "1000000s",
+        "http_directory": "include/preseed",
+        "boot_command": [
+            "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "/install/vmlinuz<wait>",
+            " auto<wait>",
+            " console-setup/ask_detect=false<wait>",
+            " console-setup/layoutcode=us<wait>",
+            " console-setup/modelcode=pc105<wait>",
+            " debconf/frontend=noninteractive<wait>",
+            " debian-installer=en_US<wait>",
+            " fb=false<wait>",
+            " initrd=/install/initrd.gz<wait>",
+            " kbd-chooser/method=us<wait>",
+            " keyboard-configuration/layout=USA<wait>",
+            " keyboard-configuration/variant=USA<wait>",
+            " locale=en_US<wait>",
+            " netcfg/get_hostname={{user `box_name`}}<wait>",
+            " grub-installer/bootdev=/dev/sda<wait>",
+            " noapic<wait>",
+            " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/xenial-preseed.cfg<wait>",
+            " -- <wait>",
+            "<enter><wait>"
+        ],
+        "shutdown_command": "shutdown -P now"
+    },{
+        "type": "virtualbox-iso",
+        "iso_url": "{{user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum`}}",
+        "iso_checksum_type": "{{user `iso_checksum_type`}}",
+        "vm_name": "{{user `box_name`}}",
+        "vboxmanage": [
+            ["modifyvm", "{{user `box_name`}}", "--memory", "2048"],
+            ["modifyvm", "{{user `box_name`}}", "--cpus", "2"],
+            ["modifyvm", "{{user `box_name`}}", "--draganddrop", "bidirectional"],
+            ["modifyvm", "{{user `box_name`}}", "--clipboard", "bidirectional"],
+            ["modifyvm", "{{user `box_name`}}", "--usb", "on"],
+            ["modifyvm", "{{user `box_name`}}", "--usbehci", "on"],
+            ["modifyvm", "{{user `box_name`}}", "--usbxhci", "on"],
+            ["modifyvm", "{{user `box_name`}}", "--audio", "none"]
+        ],
+        "ssh_username": "{{user `username`}}",
+        "ssh_password": "{{user `password`}}",
+        "ssh_timeout": "1000000s",
+        "guest_os_type": "Debian_64",
+        "http_directory": "include/preseed",
+        "boot_wait": "30s",
+        "boot_command": [
+            "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+            "/install/vmlinuz<wait>",
+            " auto<wait>",
+            " console-setup/ask_detect=false<wait>",
+            " console-setup/layoutcode=us<wait>",
+            " console-setup/modelcode=pc105<wait>",
+            " debconf/frontend=noninteractive<wait>",
+            " debian-installer=en_US<wait>",
+            " fb=false<wait>",
+            " initrd=/install/initrd.gz<wait>",
+            " kbd-chooser/method=us<wait>",
+            " keyboard-configuration/layout=USA<wait>",
+            " keyboard-configuration/variant=USA<wait>",
+            " locale=en_US<wait>",
+            " netcfg/get_hostname={{user `box_name`}}<wait>",
+            " grub-installer/bootdev=/dev/sda<wait>",
+            " noapic<wait>",
+            " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/xenial-preseed.cfg<wait>",
+            " -- <wait>",
+            "<enter><wait>"
+        ],
+        "shutdown_command": "sudo shutdown -P now"
+    }],
+    "provisioners": [{
+        "type": "shell",
+        "scripts": [
+            "scripts/common/linux/apt_reboot.sh"
+        ],
+        "expect_disconnect": true,
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    },
+    {
+        "type": "shell",
+        "scripts": [
+            "scripts/common/linux/apt.sh",
+            "scripts/common/linux/vagrant.sh"
+        ],
+        "pause_before": "3m",
+        "expect_disconnect": true,
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    },
+    {
+        "type": "shell",
+        "only": ["vmware-iso"],
+        "scripts": [
+            "scripts/common/linux/vmtools.sh"
+        ],
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    },
+    {
+        "type": "shell",
+        "only": ["virtualbox-iso"],
+        "scripts": [
+            "scripts/common/linux/vbguest.sh"
+        ],
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    },
+    {
+        "type": "shell",
+        "scripts": [
+            "scripts/common/linux/desktopify.sh",
+            "scripts/common/linux/cleanup.sh"
+        ],
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    }],
+    "post-processors": [{
+        "type": "vagrant",
+        "keep_input_artifact": false,
+        "output": "build/{{user `box_name`}}.box",
+        "compression_level": 6,
+        "include": "{{user `metadata`}}",
+        "vagrantfile_template": "{{user `vagrantfile`}}"
+    }]
+}
