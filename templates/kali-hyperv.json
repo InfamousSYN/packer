@@ -1,0 +1,148 @@
+{
+    "variables": {
+        "box_name" : "vagrant-kali-rolling-amd64",
+        "box_desc" : "Kali Rolling x64 Desktop",
+        "disk_size": "40960",
+        "num_cpus": "2",
+        "memory_size": "4096",
+        "root_username": "root",
+        "root_password": "toor"
+    },
+    "description": "{{user `box_desc`}}",
+    "builders":[{
+        "type": "vmware-iso",
+        "iso_url": "{{user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum`}}",
+        "iso_checksum_type": "{{user `iso_checksum_type`}}",
+        "vm_name": "{{user `box_name`}}",
+        "vmx_data": {
+            "memsize": 2048,
+            "numvcpus": 2,
+            "usb.present": "True",
+            "usb.pcislotnumber": "34"
+        },
+        "ssh_username": "{{user `root_username`}}",
+        "ssh_password": "{{user `root_password`}}",
+        "ssh_timeout": "1000000s",
+        "http_directory": "include/preseed",
+        "boot_command": [
+            "<esc><wait5>",
+            "install",
+            " auto",
+            " url=http://{{ .HTTPIP}}:{{ .HTTPPort }}/kali-preseed-hyperv.cfg",
+            " debian-installer=en_US",
+            " locale=en_US",
+            " keymap=us",
+            " hostname={{user `box_name`}}",
+            " domain=",
+            "<enter>"
+        ],
+        "shutdown_command": "shutdown -P now"
+    },{
+        "type": "hyperv-iso",
+        "iso_url": "{{user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum`}}",
+        "iso_checksum_type": "{{user `iso_checksum_type`}}",
+        "memory": "{{user `memory_size`}}",
+        "cpus": "{{user `num_cpus`}}",
+        "vm_name": "{{user `box_name`}}",
+        "switch_name": "{{user `network_name`}}", 
+        "ssh_username": "{{user `root_username`}}",
+        "ssh_password": "{{user `root_password`}}",
+        "ssh_timeout": "1000000s",
+        "http_directory": "include/preseed",
+        "boot_command": [
+            "<esc><wait5>",
+            "install",
+            " auto",
+            " url=http://{{ .HTTPIP}}:{{ .HTTPPort }}/kali-preseed.cfg",
+            " debian-installer=en_US",
+            " locale=en_AU",
+            " keymap=us",
+            " hostname={{user `box_name`}}",
+            " domain=",
+            "<enter>"
+        ],
+        "shutdown_command": "shutdown -P now"
+    },{
+        "type": "virtualbox-iso",
+        "iso_url": "{{user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum`}}",
+        "iso_checksum_type": "{{user `iso_checksum_type`}}",
+        "vm_name": "{{user `box_name`}}",
+        "cpus": "2",
+        "disk_block_size": "1 MiB",
+        "enable_dynamic_memory": "false",
+        "ssh_username": "{{user `root_username`}}",
+        "ssh_password": "{{user `root_password`}}",
+        "ssh_timeout": "1000000s",
+        "guest_os_type": "Debian_64",
+        "http_directory": "include/preseed",
+        "boot_command": [
+            "<esc><wait5>",
+            "install",
+            " auto",
+            " url=http://{{ .HTTPIP}}:{{ .HTTPPort }}/kali-preseed.cfg",
+            " debian-installer=en_US",
+            " locale=en_US",
+            " keymap=us",
+            " hostname={{user `box_name`}}",
+            " domain=",
+            "<enter>"
+        ],
+        "shutdown_command": "shutdown -P now"
+    }],
+    "provisioners": [{
+        "type": "shell",
+        "valid_exit_codes": [0, 100],
+        "scripts": [
+            "scripts/common/linux/apt_reboot-hyperv.sh"
+        ],
+        "expect_disconnect": true,
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    },
+    {
+        "type": "shell",
+        "valid_exit_codes": [0, 100],
+        "scripts": [
+            "scripts/common/linux/apt-hyperv.sh",
+            "scripts/common/linux/vagrant.sh"
+        ],
+        "pause_before": "3m",
+        "expect_disconnect": true,
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    },
+    {
+        "type": "shell",
+        "valid_exit_codes": [0, 100],
+        "only": ["vmware-iso"],
+        "scripts": [
+            "scripts/common/linux/vmtools.sh"
+        ],
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    },
+    {
+        "type": "shell",
+        "only": ["virtualbox-iso"],
+        "scripts": [
+            "scripts/common/linux/vbguest.sh"
+        ],
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    },
+    {
+        "type": "shell",
+        "valid_exit_codes": [0, 100],
+        "scripts": [
+            "scripts/common/linux/cleanup.sh"
+        ],
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
+    }],
+    "post-processors": [{
+        "type": "vagrant",
+        "keep_input_artifact": false,
+        "output": "build/{{user `box_name`}}.box",
+        "compression_level": 6,
+        "include": "{{user `metadata`}}",
+        "vagrantfile_template": "{{user `vagrantfile`}}"
+    }]
+}

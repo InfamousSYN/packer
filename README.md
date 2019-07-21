@@ -4,3 +4,4 @@ Packer an automation and provisioning tool. This repositories aims to provide us
 
 Wiki: https://github.com/InfamousSYN/packer/wiki/
 
+Running: `packer build -only=hyperv-iso -on-error=ask -var-file ./uservars-hyperv.json ./templates/kali-hyperv.json`
