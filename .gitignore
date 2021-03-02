@@ -1,3 +1,6 @@
-build/
+build/**
+packer_cache/**
 
 **.iso
+packerlog.txt
+build/Vagrantfile
