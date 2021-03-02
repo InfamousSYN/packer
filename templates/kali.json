@@ -3,15 +3,14 @@
         "box_name" : "vagrant-kali-rolling-amd64",
         "box_desc" : "Kali Rolling x64 Desktop",
         "disk_size": "40960",
-        "root_username": "root",
-        "root_password": "toor"
+        "root_username": "vagrant",
+        "root_password": "vagrant"
     },
     "description": "{{user `box_desc`}}",
     "builders":[{
         "type": "vmware-iso",
         "iso_url": "{{user `iso_url`}}",
         "iso_checksum": "{{user `iso_checksum`}}",
-        "iso_checksum_type": "{{user `iso_checksum_type`}}",
         "vm_name": "{{user `box_name`}}",
         "vmx_data": {
             "memsize": 2048,
@@ -32,15 +31,16 @@
             " locale=en_US",
             " keymap=us",
             " hostname={{user `box_name`}}",
+            " interface=ens33",
+            " ipv6.disable=1",
             " domain=",
             "<enter>"
         ],
-        "shutdown_command": "shutdown -P now"
+        "shutdown_command": "echo {{user `root_password`}} | sudo -S shutdown -P now"
     },{
         "type": "virtualbox-iso",
         "iso_url": "{{user `iso_url`}}",
         "iso_checksum": "{{user `iso_checksum`}}",
-        "iso_checksum_type": "{{user `iso_checksum_type`}}",
         "vm_name": "{{user `box_name`}}",
         "vboxmanage": [
             ["modifyvm", "{{user `box_name`}}", "--memory", "2048"],
@@ -69,7 +69,7 @@
             " domain=",
             "<enter>"
         ],
-        "shutdown_command": "shutdown -P now"
+        "shutdown_command": "echo {{user `root_password`}} | sudo -S shutdown -P now"
     }],
     "provisioners": [{
         "type": "shell",
