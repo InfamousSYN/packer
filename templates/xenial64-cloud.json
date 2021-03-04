@@ -12,7 +12,6 @@
         "type": "vmware-iso",
         "iso_url": "{{user `iso_url`}}",
         "iso_checksum": "{{user `iso_checksum`}}",
-        "iso_checksum_type": "{{user `iso_checksum_type`}}",
         "vm_name": "{{user `box_name`}}",
         "vmx_data": {
             "memsize": 2048,
@@ -47,12 +46,11 @@
             " -- <wait>",
             "<enter><wait>"
         ],
-        "shutdown_command": "shutdown -P now"
+        "shutdown_command": "echo {{user `root_password`}} | sudo -S shutdown -P now"
     },{
         "type": "virtualbox-iso",
         "iso_url": "{{user `iso_url`}}",
         "iso_checksum": "{{user `iso_checksum`}}",
-        "iso_checksum_type": "{{user `iso_checksum_type`}}",
         "vm_name": "{{user `box_name`}}",
         "vboxmanage": [
             ["modifyvm", "{{user `box_name`}}", "--memory", "2048"],
@@ -95,7 +93,7 @@
             " -- <wait>",
             "<enter><wait>"
         ],
-        "shutdown_command": "sudo shutdown -P now"
+        "shutdown_command": "echo {{user `root_password`}} | sudo -S shutdown -P now"
     }],
     "provisioners": [{
         "type": "shell",
@@ -134,7 +132,6 @@
     {
         "type": "shell",
         "scripts": [
-            "scripts/common/linux/desktopify.sh",
             "scripts/common/linux/cleanup.sh"
         ],
         "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"

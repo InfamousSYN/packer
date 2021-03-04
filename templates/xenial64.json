@@ -12,7 +12,6 @@
         "type": "vmware-iso",
         "iso_url": "{{user `iso_url`}}",
         "iso_checksum": "{{user `iso_checksum`}}",
-        "iso_checksum_type": "{{user `iso_checksum_type`}}",
         "vm_name": "{{user `box_name`}}",
         "vmx_data": {
             "memsize": 2048,
@@ -22,6 +21,7 @@
         "ssh_password": "{{user `password`}}",
         "ssh_timeout": "1000000s",
         "http_directory": "include/preseed",
+        "boot_wait": "5s",
         "boot_command": [
             "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
             "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
@@ -47,12 +47,11 @@
             " -- <wait>",
             "<enter><wait>"
         ],
-        "shutdown_command": "shutdown -P now"
+        "shutdown_command": "echo {{user `root_password`}} | sudo -S shutdown -P now"
     },{
         "type": "virtualbox-iso",
         "iso_url": "{{user `iso_url`}}",
         "iso_checksum": "{{user `iso_checksum`}}",
-        "iso_checksum_type": "{{user `iso_checksum_type`}}",
         "vm_name": "{{user `box_name`}}",
         "vboxmanage": [
             ["modifyvm", "{{user `box_name`}}", "--memory", "2048"],
@@ -69,7 +68,7 @@
         "ssh_timeout": "1000000s",
         "guest_os_type": "Debian_64",
         "http_directory": "include/preseed",
-        "boot_wait": "30s",
+        "boot_wait": "5s",
         "boot_command": [
             "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
             "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
@@ -95,7 +94,7 @@
             " -- <wait>",
             "<enter><wait>"
         ],
-        "shutdown_command": "sudo shutdown -P now"
+        "shutdown_command": "echo {{user `root_password`}} | sudo -S shutdown -P now"
     }],
     "provisioners": [{
         "type": "shell",
@@ -134,7 +133,6 @@
     {
         "type": "shell",
         "scripts": [
-            "scripts/common/linux/desktopify.sh",
             "scripts/common/linux/cleanup.sh"
         ],
         "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
