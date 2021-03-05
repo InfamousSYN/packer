@@ -137,12 +137,18 @@
         ],
         "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
     }],
-    "post-processors": [{
+    "post-processors": [[{
         "type": "vagrant",
         "keep_input_artifact": false,
         "output": "build/{{user `box_name`}}.box",
         "compression_level": 6,
         "include": "{{user `metadata`}}",
         "vagrantfile_template": "{{user `vagrantfile`}}"
-    }]
+    },
+    {
+        "type":"vagrant-cloud",
+        "access_token":"{{user `account_key`}}",
+        "box_tag":"{{user `account_name`}}/{{user `box_name`}}",
+        "version":"{{user `box_version`}}"
+    }]]
 }
