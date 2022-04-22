@@ -43,5 +43,8 @@ jobs:
           account_key: ${{ secrets.vagrantcloud_api }}
           box_version: "1.0.0"
           iso_url: "https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso"
+          iso_checksum: "eface812076f925f59c448596894b11075bf40212752f704ad333998c9c28d9f"
+          metadata: "include/vagrant/metadta/virtualbox/metadata.json"
+          vagrantfile: "include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile"
 
       # additional steps to process artifacts
