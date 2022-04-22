@@ -4,7 +4,7 @@ name: packer-kali-virtualbox
 
 on:
   schedule:
-    - cron: '54 22 * * 5'
+    - cron: '12 23 * * 5'
 
 jobs:
   packer:
@@ -35,7 +35,7 @@ jobs:
         uses: hashicorp/packer-github-actions@master
         with:
           command: build
-          arguments: "-color=false -on-error=abort -only=virtualbox-iso"
+          arguments: "-color=false -on-error=abort -only=virtualbox-iso -var 'iso_url=${{ iso_url }}' -var 'iso_checksum=${{ iso_checksum }}' -var 'account_name=${{ account_name }}' -var 'account_key=${{ account_key }}' -var 'box_version=${{ box_version }}' -var 'metadata=${{ metadata }}' -var 'vagrantfile=${{ vagrantfile }}'"
           target: templates/kali.json
         env:
           PACKER_LOG: 1
