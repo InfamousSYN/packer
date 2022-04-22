@@ -4,7 +4,7 @@ name: packer-kali-virtualbox
 
 on:
   schedule:
-    - cron: '30 11 * * 5'
+    - cron: '41 11 * * 5'
 
 jobs:
   packer:
@@ -35,12 +35,14 @@ jobs:
         uses: hashicorp/packer-github-actions@master
         with:
           command: build
-          arguments: "-color=false -on-error=abort"
+          arguments: "-color=false -on-error=abort -only=virtualbox-iso"
           target: templates/kali.json
           working_directory: build
         env:
           PACKER_LOG: 1
-          HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
-          HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
+          account_name: ${{ secrets.vagrantcloud_username }}
+          account_key: ${{ secrets.vagrantcloud_api }}
+          box_version: "1.0.0"
+          iso_url: "https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso"
 
       # additional steps to process artifacts
