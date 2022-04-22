@@ -36,7 +36,7 @@ jobs:
         with:
           command: build
           arguments: "-color=false -on-error=abort -only=virtualbox-iso"
-          target: templates/kali.json
+          target: ../templates/kali.json
           working_directory: build
         env:
           PACKER_LOG: 1
