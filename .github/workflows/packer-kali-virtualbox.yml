@@ -45,7 +45,7 @@ jobs:
             -var account_key=ACCOUNT_KEY
             -var box_version=BOX_VERSION
             -var metadata=include/vagrant/metadta/virtualbox/metadata.json
-            -var vagrantfile="include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile
+            -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile
           target: templates/kali.json
         env:
           PACKER_LOG: 1
