@@ -4,7 +4,7 @@ name: packer-kali-virtualbox
 
 on:
   schedule:
-    - cron: '30 2 * * 6'
+    - cron: '45 4 * * 6'
 
 jobs:
   packer:
@@ -39,13 +39,13 @@ jobs:
             -color=false
             -on-error=abort
             -only=virtualbox-iso
-            -var iso_url=${{ ISO_URL }}
-            -var iso_checksum=${{ ISO_CHECKSUM }}
-            -var account_name=${{ ACCOUNT_NAME }}
-            -var account_key=${{ ACCOUNT_KEY }}
-            -var box_version=${{ BOX_VERSION }}
-            -var metadata=${{ METADATA }}
-            -var vagrantfile=${{ VAGRANTFILE }}
+            -var iso_url=${{ env `ISO_URL` }}
+            -var iso_checksum=${{ env `ISO_CHECKSUM` }}
+            -var account_name=${{ env `ACCOUNT_NAME` }}
+            -var account_key=${{ env `ACCOUNT_KEY` }}
+            -var box_version=${{ env `BOX_VERSION` }}
+            -var metadata=${{ env `METADATA` }}
+            -var vagrantfile=${{ env `VAGRANTFILE` }}
           target: templates/kali.json
         env:
           PACKER_LOG: 1
