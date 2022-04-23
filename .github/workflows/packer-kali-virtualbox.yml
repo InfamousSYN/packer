@@ -4,7 +4,7 @@ name: packer-kali-virtualbox
 
 on:
   schedule:
-    - cron: '00 13 * * 6'
+    - cron: '10 23 * * 6'
 
 jobs:
   packer:
