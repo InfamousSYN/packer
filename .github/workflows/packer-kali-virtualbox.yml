@@ -29,11 +29,6 @@ jobs:
           sudo dpkg-reconfigure virtualbox-dkms
           sudo ldconfig
 
-      # locate virtualbox
-      - name: Locate Virtualbox
-        run: |
-          sudo locate VBoxManage
-
       # fix backwards incompatibilities in template
       - name: Fix Template
         uses: hashicorp/packer-github-actions@master
