@@ -98,6 +98,6 @@ jobs:
       - name: Build Artifact
         run: |
           export ISO_CHECKSUM=$(sha256sum $(cat target_iso.lst) | cut -d " " -f 1)
-          sudo packer build -color=false -on-error=abort -only=virtualbox-iso -var iso_url=$(cat target_iso.lst) -var iso_checksum=$(echo $ISO_CHECKSUM) -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json
+          sudo PACKERLOG=1 packer build -color=false -on-error=abort -only=virtualbox-iso -var iso_url=$(cat target_iso.lst) -var iso_checksum=$(echo $ISO_CHECKSUM) -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json
 
       # additional steps to process artifacts
