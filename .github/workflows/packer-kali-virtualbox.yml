@@ -49,8 +49,8 @@ jobs:
           target: templates/kali.json
         env:
           PACKER_LOG: 1
-          ACCOUNT_NAME: ${{ secrets.vagrantcloud_username }}
-          ACCOUNT_KEY: ${{ secrets.vagrantcloud_api }}
+          ACCOUNT_NAME: ${{ secrets.VAGRANTCLOUD_USERNAME }}
+          ACCOUNT_KEY: ${{ secrets.VAGRANTCLOUD_API }}
           BOX_VERSION: "1.0.0"
           ISO_URL: "https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso"
 
