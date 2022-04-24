@@ -35,7 +35,8 @@ jobs:
 
       # build artifact
       - name: Build Artifact
-        uses: hashicorp/packer-github-actions@master
+        uses: docker://hashicorp/packer:1.7.10
+
         with:
           command: build
           arguments: |
