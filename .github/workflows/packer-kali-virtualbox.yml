@@ -27,12 +27,12 @@ jobs:
           sudo apt-get update -y
           sudo apt install -y virtualbox linux-headers-generic
           sudo dpkg-reconfigure virtualbox-dkms
+          sudo ldconfig
 
       # locate virtualbox
       - name: Locate Virtualbox
         run: |
           sudo locate VBoxManage
-          sudo whereis VBoxManage
 
       # fix backwards incompatibilities in template
       - name: Fix Template
