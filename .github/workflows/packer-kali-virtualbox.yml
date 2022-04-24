@@ -56,19 +56,7 @@ jobs:
         uses: docker://hashicorp/packer:1.7.10
 
         with:
-          args: |
-            build
-            -color=false
-            -on-error=abort
-            -only=virtualbox-iso
-            -var 'iso_url=https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso'
-            -var 'iso_checksum=eface812076f925f59c448596894b11075bf40212752f704ad333998c9c28d9f'
-            -var 'account_name=${{ secrets.VAGRANTCLOUD_USERNAME }}'
-            -var 'account_key=${{ secrets.VAGRANTCLOUD_API }}'
-            -var 'box_version=1.0.0'
-            -var 'metadata=include/vagrant/metadta/virtualbox/metadata.json'
-            -var 'vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile'
-            templates/kali.json
+          args: "build -color=false -on-error=abort -only=virtualbox-iso -var 'iso_url=https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso' -var 'iso_checksum=eface812076f925f59c448596894b11075bf40212752f704ad333998c9c28d9f' -var 'account_name=${{ secrets.VAGRANTCLOUD_USERNAME }}' -var 'account_key=${{ secrets.VAGRANTCLOUD_API }}' -var 'box_version=1.0.0' -var 'metadata=include/vagrant/metadta/virtualbox/metadata.json' -var 'vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile' templates/kali.json"
         env:
           PACKER_LOG: 1
 
