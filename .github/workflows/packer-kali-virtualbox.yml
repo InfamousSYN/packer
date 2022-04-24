@@ -57,7 +57,7 @@ jobs:
 
         with:
           args: |
-            build
+            ./packer build
             -color=false
             -on-error=abort
             -only=virtualbox-iso
