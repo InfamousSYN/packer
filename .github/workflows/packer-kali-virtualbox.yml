@@ -80,8 +80,8 @@ jobs:
       - name: Download ISO
         run: |
           curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 > target_iso.lst
-          curl -L http://cdimage.kali.org/kali-images/kali-weekly/`cat target_iso.lst` --output `cat target_iso.lst`
-          file `cat target_iso.lst`
+          curl -L http://cdimage.kali.org/kali-images/kali-weekly/$(cat target_iso.lst) --output $(cat target_iso.lst)
+          file $(cat target_iso.lst)
           sudo apt -y install coreutils
   
       # fix backwards incompatibilities in template
@@ -91,13 +91,13 @@ jobs:
       # validate templates
       - name: Validate Template
         run: |
-          export ISO_CHECKSUM=$(sha256sum `cat target_iso.lst` | cut -d " " -f 1)
+          export ISO_CHECKSUM=$(sha256sum $(cat target_iso.lst) | cut -d " " -f 1)
           sudo packer validate -only=virtualbox-iso -var iso_url=$(cat target_iso.lst) -var iso_checksum=$(echo $ISO_CHECKSUM) -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json
 
       # build artifact
       - name: Build Artifact
         run: |
-          export ISO_CHECKSUM=$(sha256sum `cat target_iso.lst` | cut -d " " -f 1)
-          sudo PACKER_LOG=1 packer build -color=false -on-error=abort -only=virtualbox-iso -var iso_url=$(cat target_iso.lst) -var iso_checksum=$(echo $ISO_CHECKSUM) -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json
+          export ISO_CHECKSUM=$(sha256sum $(cat target_iso.lst) | cut -d " " -f 1)
+          sudo packer build -color=false -on-error=abort -only=virtualbox-iso -var iso_url=$(cat target_iso.lst) -var iso_checksum=$(echo $ISO_CHECKSUM) -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json
 
       # additional steps to process artifacts
