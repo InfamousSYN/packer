@@ -5,7 +5,9 @@ name: packer-kali-virtualbox
 on:
   #schedule:
   #  - cron: '15 02 * * 0'
-  push
+  push:
+    paths:
+      - '.github/workflows/packer-kali-virtualbox.yml'
 
 jobs:
   packer:
