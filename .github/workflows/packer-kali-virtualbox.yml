@@ -4,7 +4,7 @@ name: packer-kali-virtualbox
 
 on:
   schedule:
-    - cron: '00 02 * * 0'
+    - cron: '15 02 * * 0'
 
 jobs:
   packer:
@@ -39,19 +39,14 @@ jobs:
             -color=false
             -on-error=abort
             -only=virtualbox-iso
-            -var iso_url=ISO_URL
-            -var iso_checksum=ISO_CHECKSUM
-            -var account_name=ACCOUNT_NAME
-            -var account_key=ACCOUNT_KEY
-            -var box_version=BOX_VERSION
+            -var iso_url=https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso
+            -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }}
+            -var account_key=${{ secrets.VAGRANTCLOUD_API }}
+            -var box_version=1.0.0
             -var metadata=include/vagrant/metadta/virtualbox/metadata.json
             -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile
           target: templates/kali.json
         env:
           PACKER_LOG: 1
-          ACCOUNT_NAME: ${{ secrets.VAGRANTCLOUD_USERNAME }}
-          ACCOUNT_KEY: ${{ secrets.VAGRANTCLOUD_API }}
-          BOX_VERSION: "1.0.0"
-          ISO_URL: "https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso"
 
       # additional steps to process artifacts
