@@ -33,31 +33,42 @@ jobs:
           arguments: -syntax-only
           target: templates/kali.json
 
-#      # build artifact
-#      - name: Build Artifact
-#        uses: hashicorp/packer-github-actions@master
-
-#        with:
-#          command: build
-#          arguments: |
-#            -color=false
-#            -on-error=abort
-#            -only=virtualbox-iso
-#            -var iso_url=https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso
-#            -var iso_checksum=eface812076f925f59c448596894b11075bf40212752f704ad333998c9c28d9f
-#            -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }}
-#            -var account_key=${{ secrets.VAGRANTCLOUD_API }}
-#            -var box_version=1.0.0
-#            -var metadata=include/vagrant/metadta/virtualbox/metadata.json
-#            -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile
+      # install virtualbox
+      - name: Install Virtualbox
+        run: |
+          sudo apt update -y
+          sudo apt-get install -y git bash openssl curl zip 
+          sudo add-apt-repository multiverse 
+          sudo apt-get update -y
+          sudo apt install -y virtualbox linux-headers-generic
+          sudo dpkg-reconfigure virtualbox-dkms
 
       # build artifact
       - name: Build Artifact
-        uses: docker://hashicorp/packer:1.7.10
+        uses: hashicorp/packer-github-actions@master
 
         with:
-          args: "build -color=false -on-error=abort -only=virtualbox-iso -var 'iso_url=https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso' -var 'iso_checksum=eface812076f925f59c448596894b11075bf40212752f704ad333998c9c28d9f' -var 'account_name=${{ secrets.VAGRANTCLOUD_USERNAME }}' -var 'account_key=${{ secrets.VAGRANTCLOUD_API }}' -var 'box_version=1.0.0' -var 'metadata=include/vagrant/metadta/virtualbox/metadata.json' -var 'vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile' templates/kali.json"
+          command: build
+          arguments: |
+            -color=false
+            -on-error=abort
+            -only=virtualbox-iso
+            -var iso_url=https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso
+            -var iso_checksum=eface812076f925f59c448596894b11075bf40212752f704ad333998c9c28d9f
+            -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }}
+            -var account_key=${{ secrets.VAGRANTCLOUD_API }}
+            -var box_version=1.0.0
+            -var metadata=include/vagrant/metadta/virtualbox/metadata.json
+            -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile
         env:
           PACKER_LOG: 1
+      # build artifact
+#      - name: Build Artifact
+#        uses: docker://hashicorp/packer:1.7.10
+
+#        with:
+#          args: "build -color=false -on-error=abort -only=virtualbox-iso -var 'iso_url=https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso' -var 'iso_checksum=eface812076f925f59c448596894b11075bf40212752f704ad333998c9c28d9f' -var 'account_name=${{ secrets.VAGRANTCLOUD_USERNAME }}' -var 'account_key=${{ secrets.VAGRANTCLOUD_API }}' -var 'box_version=1.0.0' -var 'metadata=include/vagrant/metadta/virtualbox/metadata.json' -var 'vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile' templates/kali.json"
+#        env:
+#          PACKER_LOG: 1
 
       # additional steps to process artifacts
