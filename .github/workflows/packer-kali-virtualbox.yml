@@ -79,6 +79,9 @@ jobs:
       # download iso
       - name: Download ISO
         run: |
+          host cdimage.kali.org
+          curl https://cdimage.kali.org/kali-images/kali-weekly/ |grep installer-amd64.iso > target_iso.lst
+          cat target_iso.lst
           curl https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso --output kali-linux-2022-W16-installer-amd64.iso
           file kali-linux-2022-W16-installer-amd64.iso
           head kali-linux-2022-W16-installer-amd64.iso
