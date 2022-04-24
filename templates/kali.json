@@ -56,7 +56,6 @@
         "ssh_password": "{{user `root_password`}}",
         "ssh_timeout": "1000000s",
         "guest_os_type": "Debian_64",
-        "guest_additions_mode":"disable"
         "http_directory": "include/preseed",
         "boot_command": [
             "<esc><wait5>",
