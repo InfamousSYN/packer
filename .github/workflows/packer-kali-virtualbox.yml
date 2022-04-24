@@ -28,6 +28,12 @@ jobs:
           sudo apt install -y virtualbox linux-headers-generic
           sudo dpkg-reconfigure virtualbox-dkms
 
+      # locate virtualbox
+      - name: Locate Virtualbox
+        run: |
+          sudo locate VBoxManage
+          sudo whereis VBoxManage
+
       # fix backwards incompatibilities in template
       - name: Fix Template
         uses: hashicorp/packer-github-actions@master
