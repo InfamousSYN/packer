@@ -22,7 +22,7 @@ jobs:
       - name: Install Virtualbox
         run: |
           sudo apt update -y
-          sudo apt-get install -y git bash openssl curl zip 
+          sudo apt-get install -y git bash openssl curl zip locate whereis
           sudo add-apt-repository multiverse 
           sudo apt-get update -y
           sudo apt install -y virtualbox linux-headers-generic
