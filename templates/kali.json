@@ -10,7 +10,7 @@
     "builders":[{
         "type": "vmware-iso",
         "iso_url": "{{user `iso_url`}}",
-        "iso_checksum":"none",
+        "iso_checksum": "{{user `iso_checksum`}}",
         "vm_name": "{{user `box_name`}}",
         "vmx_data": {
             "memsize": 2048,
@@ -40,7 +40,7 @@
     },{
         "type": "virtualbox-iso",
         "iso_url": "{{user `iso_url`}}",
-        "iso_checksum":"none",
+        "iso_checksum": "{{user `iso_checksum`}}",
         "vm_name": "{{user `box_name`}}",
         "vboxmanage": [
             ["modifyvm", "{{user `box_name`}}", "--memory", "2048"],
