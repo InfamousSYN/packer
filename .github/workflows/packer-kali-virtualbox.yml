@@ -43,7 +43,7 @@ jobs:
             -on-error=abort
             -only=virtualbox-iso
             -var iso_url=https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso
-            -var iso_checksum=https://cdimage.kali.org/kali-images/kali-weekly/SHA256SUMS
+            -var iso_checksum=sha265:eface812076f925f59c448596894b11075bf40212752f704ad333998c9c28d9f
             -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }}
             -var account_key=${{ secrets.VAGRANTCLOUD_API }}
             -var box_version=1.0.0
