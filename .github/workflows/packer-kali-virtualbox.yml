@@ -57,7 +57,7 @@ jobs:
 
         with:
           args: |
-            ./packer build
+            build templates/kali.json
             -color=false
             -on-error=abort
             -only=virtualbox-iso
@@ -68,7 +68,6 @@ jobs:
             -var box_version=1.0.0
             -var metadata=include/vagrant/metadta/virtualbox/metadata.json
             -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile
-            templates/kali.json
         env:
           PACKER_LOG: 1
 
