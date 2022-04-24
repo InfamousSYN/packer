@@ -79,6 +79,7 @@ jobs:
           curl https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso --output kali-linux-2022-W16-installer-amd64.iso
           sudo apt -y install coreutils
           export ISO_CHECKSUM=$(sha256sum kali-linux-2022-W16-installer-amd64.iso)
+          env
   
       # fix backwards incompatibilities in template
       - name: Fix Template
