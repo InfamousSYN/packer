@@ -79,12 +79,9 @@ jobs:
       # download iso
       - name: Download ISO
         run: |
-          host cdimage.kali.org
-          wget https://cdimage.kali.org/kali-images/kali-weekly/ |grep installer-amd64.iso > target_iso.lst
-          cat target_iso.lst
-          curl https://cdimage.kali.org/kali-images/kali-weekly/kali-linux-2022-W16-installer-amd64.iso --output kali-linux-2022-W16-installer-amd64.iso
-          file kali-linux-2022-W16-installer-amd64.iso
-          head kali-linux-2022-W16-installer-amd64.iso
+          curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 > target_iso.lst
+          curl -L http://cdimage.kali.org/kali-images/kali-weekly/`cat target_iso.lst` --output `cat target_iso.lst`
+          file `cat target_iso.lst`
           sudo apt -y install coreutils
   
       # fix backwards incompatibilities in template
