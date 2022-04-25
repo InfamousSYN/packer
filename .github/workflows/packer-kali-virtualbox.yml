@@ -94,7 +94,7 @@ jobs:
 
       - name: Configure Instance
         run: |
-          ssh -l ubuntu `cat instance_public_ip.txt` "sudo whoami"
+          ssh -l ubuntu `cat instance_public_ip.txt` -i github_actions.pem "sudo whoami"
 #          ssh -l ubuntu `cat instance_public_ip.txt` sudo curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 #          ssh -l ubuntu `cat instance_public_ip.txt` sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 #          ssh -l ubuntu `cat instance_public_ip.txt` sudo apt-get update && sudo apt-get -y install packer
