@@ -122,8 +122,8 @@ jobs:
         run: |
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt -y install coreutils"
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 > target_iso.lst"
-          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "export TARGET_ISO=`cat target_iso.lst`; curl -L http://cdimage.kali.org/kali-images/kali-weekly/$(TARGET_ISO) --output $(TARGET_ISO)"
-          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "export TARGET_ISO=`cat target_iso.lst`; file $(TARGET_ISO)"
+          ssh -l ubuntu ec2-13-239-121-35.ap-southeast-2.compute.amazonaws.com -i packer/github_actions.pem 'bash -c '"'"'curl -L http://cdimage.kali.org/kali-images/kali-weekly/"$(cat target_iso.lst)" --output "$(cat target_iso.lst)"'"'"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem 'bash -c '"'"'file "$(cat target_iso.lst)"'"'"
 
       - name: Instance Configuration - Checkout packer repo
         run: |
@@ -135,19 +135,11 @@ jobs:
 
       - name: Instance Packer - Validate Template
         run: |
-          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "cd packer; sudo packer validate -only=virtualbox-iso -var iso_url=$(cat ../target_iso.lst) \
-          -var iso_checksum=$(sha256sum $(cat ../target_iso.lst) | cut -d " " -f 1) \
-          -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} \
-          -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json \
-          -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem 'bash -c '"'"'cd packer; sudo packer validate -only=virtualbox-iso -var iso_url="$(cat ../target_iso.lst)" -var iso_checksum="$( cat ../target_iso.lst | sha256sum |cut -d " " -f 1 )" -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json'"'"
 
       - name: Instance Packer - Build Image
         run: |
-          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "cd packer; sudo PACKER_LOG=1 packer build -color=false -on-error=abort -only=virtualbox-iso -var iso_url=$(cat ../target_iso.lst) \
-          -var iso_checksum=$(sha256sum $(cat ../target_iso.lst) | cut -d " " -f 1) \
-          -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} \
-          -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json \
-          -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem 'bash -c '"'"'cd packer; sudo PACKER_LOG=1 packer build -color=false -on-error=abort -only=virtualbox-iso -var iso_url="$(cat ../target_iso.lst)" -var iso_checksum="$( cat ../target_iso.lst | sha256sum |cut -d " " -f 1 )" -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json'"'"
 
       # Terminate instance
       - name: Terminate instance
