@@ -85,16 +85,16 @@ jobs:
       # ami-0b7dcd6e6fd797935
       - name: Create instance
         run: |
-          export RUNNER_PUBLIC_IP=`curl icanhazip.com`
           export AWS_SECURITY_GROUP_ID=`aws ec2 create-security-group --group-name GithubActionsPacker --description "Bespoke security group to grant access from github action runner to instance" | grep -oE 'sg-.*' | tr -d '"'`
           echo $AWS_SECURITY_GROUP_ID > security_group_id.txt
-          aws ec2 authorize-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol tcp --port 22 --cidr $RUNNER_PUBLIC_IP/32
+          aws ec2 authorize-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol tcp --port 22 --cidr `curl https://checkip.amazonaws.com`/32
+          curl https://checkip.amazonaws.com
           aws ec2 run-instances --image-id ${{ secrets.AWS_IMAGE_ID }} --instance-type ${{ secrets.AWS_INSTANCE_TYPE }} --key-name ${{ secrets.AWS_EC2_INSTANCE_NAME }} --security-group-ids $AWS_SECURITY_GROUP_ID --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=GithubActions_Packer_Build}]' |grep InstanceId |cut -d ":" -f2 | tr -d '"' | tr -d ',' | grep -oE 'i-*.*' >> instance_id.txt
           aws ec2 describe-instances --instance-ids $( cat instance_id.txt ) |grep PublicIpAddress | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' >> instance_public_ip.txt
 
       - name: Configure Instance
         run: |
-          ssh -l ubuntu `cat instance_public_ip.txt` -i github_actions.pem "sudo whoami"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo whoami"
 #          ssh -l ubuntu `cat instance_public_ip.txt` sudo curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 #          ssh -l ubuntu `cat instance_public_ip.txt` sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 #          ssh -l ubuntu `cat instance_public_ip.txt` sudo apt-get update && sudo apt-get -y install packer
