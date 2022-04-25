@@ -90,7 +90,7 @@ jobs:
           echo $AWS_SECURITY_GROUP_ID > security_group_id.txt
           aws ec2 authorize-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol tcp --port 22 --cidr $RUNNER_PUBLIC_IP/32
           aws ec2 run-instances --image-id ${{ secrets.AWS_IMAGE_ID }} --instance-type ${{ secrets.AWS_INSTANCE_TYPE }} --key-name ${{ secrets.AWS_EC2_INSTANCE_NAME }} --security-group-ids $AWS_SECURITY_GROUP_ID --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=GithubActions_Packer_Build}]' |grep InstanceId |cut -d ":" -f2 | tr -d '"' | tr -d ',' | grep -oE 'i-*.*' >> instance_id.txt
-          aws ec2 describe-instances --instance-ids $( echo instance_id.txt ) |grep PublicIpAddress | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' >> instance_public_ip.txt
+          aws ec2 describe-instances --instance-ids $( cat instance_id.txt ) |grep PublicIpAddress | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' >> instance_public_ip.txt
 
       # Terminate instance
       - name: Terminate instance
