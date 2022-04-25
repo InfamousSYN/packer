@@ -97,18 +97,56 @@ jobs:
         run: |
           sleep 60
 
-      - name: Configure Instance
+      - name: Instance Configuration - Install Packer
         run: |
-          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo whoami"
-#          ssh -l ubuntu `cat instance_public_ip.txt` sudo curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-#          ssh -l ubuntu `cat instance_public_ip.txt` sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-#          ssh -l ubuntu `cat instance_public_ip.txt` sudo apt-get update && sudo apt-get -y install packer
-#          ssh -l ubuntu `cat instance_public_ip.txt` sudo dpkg-reconfigure packer
-#          ssh -l ubuntu `cat instance_public_ip.txt` sudo ldconfig
-#          ssh -l ubuntu `cat instance_public_ip.txt` curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 > target_iso.lst
-#          ssh -l ubuntu `cat instance_public_ip.txt` curl -L http://cdimage.kali.org/kali-images/kali-weekly/$(cat target_iso.lst) --output $(cat target_iso.lst)
-#          ssh -l ubuntu `cat instance_public_ip.txt` file $(cat target_iso.lst)
-#          ssh -l ubuntu `cat instance_public_ip.txt` sudo apt -y install coreutils
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt-add-repository 'deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main'"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt-get update && sudo apt-get -y install packer"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo dpkg-reconfigure packer"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo ldconfig"
+
+      - name: Instance Configuration - Install Virtualbox
+        run: |
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt update -y"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "apt-get install -y git bash openssl curl zip linux-headers-generic"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo add-apt-repository multiverse "
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "curl https://download.virtualbox.org/virtualbox/6.1.34/virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb --output virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt install -y libqt5core5a libqt5gui5 libqt5opengl5 libqt5printsupport5 libqt5widgets5 libqt5x11extras5 libsdl1.2debian libopus0 virtualbox-guest-x11"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo dpkg -i ./virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt-get update -y"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "curl https://download.virtualbox.org/virtualbox/6.1.34/Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack --output Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "echo 'y' | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack"
+
+      - name: Instance Configuration - Downloading ISO
+        run: |
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 > target_iso.lst"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "curl -L http://cdimage.kali.org/kali-images/kali-weekly/$(cat target_iso.lst) --output $(cat target_iso.lst)"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "file $(cat target_iso.lst)"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt -y install coreutils"
+
+      - name: Instance Configuration - Checkout packer repo
+        run: |
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "git clone https://github.com/InfamousSYN/packer"
+
+      - name: Instance Packer - Fix Template
+        run: |
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "cd packer; sudo packer fix templates/kali.json"
+
+      - name: Instance Packer - Validate Template
+        run: |
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "cd packer; sudo packer validate -only=virtualbox-iso -var iso_url=$(cat ../target_iso.lst) \
+          -var iso_checksum=$(sha256sum $(cat ../target_iso.lst) | cut -d " " -f 1) \
+          -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} \
+          -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json \
+          -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json"
+
+      - name: Instance Packer - Build Image
+        run: |
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "cd packer; sudo PACKER_LOG=1 packer build -color=false -on-error=abort -only=virtualbox-iso -var iso_url=$(cat ../target_iso.lst) \
+          -var iso_checksum=$(sha256sum $(cat ../target_iso.lst) | cut -d " " -f 1) \
+          -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} \
+          -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json \
+          -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json"
 
       # Terminate instance
       - name: Terminate instance
@@ -122,19 +160,6 @@ jobs:
       - name: Delete Security Group
         run: |
           aws ec2 delete-security-group --group-id $( cat security_group_id.txt )
-
-      # install virtualbox
-#      - name: Install Virtualbox
-#        run: |
-#          sudo apt update -y
-#          sudo apt-get install -y git bash openssl curl zip linux-headers-generic
-#          sudo add-apt-repository multiverse 
-#          curl https://download.virtualbox.org/virtualbox/6.1.34/virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb --output virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb
-#          sudo apt install -y libqt5core5a libqt5gui5 libqt5opengl5 libqt5printsupport5 libqt5widgets5 libqt5x11extras5 libsdl1.2debian libopus0 virtualbox-guest-x11
-#          sudo dpkg -i ./virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb
-#          sudo apt-get update -y
-#          curl https://download.virtualbox.org/virtualbox/6.1.34/Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack --output Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack
-#          echo "y" | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack
 
        # build artifact
 #      - name: Build Artifact
