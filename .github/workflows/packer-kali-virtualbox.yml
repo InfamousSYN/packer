@@ -108,7 +108,7 @@ jobs:
       - name: Instance Configuration - Install Virtualbox
         run: |
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt update -y"
-          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "apt-get install -y git bash openssl curl zip linux-headers-generic"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt-get install -y git bash openssl curl zip linux-headers-generic"
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo add-apt-repository multiverse "
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "curl https://download.virtualbox.org/virtualbox/6.1.34/virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb --output virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb"
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt install -y libqt5core5a libqt5gui5 libqt5opengl5 libqt5printsupport5 libqt5widgets5 libqt5x11extras5 libsdl1.2debian libopus0 virtualbox-guest-x11"
