@@ -80,6 +80,7 @@ jobs:
       - name: Save github action key
         run: |
           echo "${{ secrets.AWS_EC2_INSTANCE_KEY }}" >> github_actions.pem
+          sudo chmod 600 github_actions.pem
 
       # Create instance using AWS Console
       # ami-0b7dcd6e6fd797935
@@ -112,7 +113,7 @@ jobs:
           
       - name: Delete Security Group
         run: |
-          sleep(30)
+          sleep(60)
           aws ec2 delete-security-group --group-id $( cat security_group_id.txt )
 
       # install virtualbox
