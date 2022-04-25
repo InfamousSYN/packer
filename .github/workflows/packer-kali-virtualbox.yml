@@ -9,34 +9,13 @@ on:
     paths:
       - '.github/workflows/packer-kali-virtualbox.yml'
 jobs:
-  packer:
+  valdiate_template:
     runs-on: ubuntu-latest
-    name: packer
+    name: valdiate_template_packer
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
-      # install virtualbox
-      - name: Check CPUinfo
-        run: cat /proc/cpuinfo
-
-      # install virtualbox
-      - name: Install Virtualbox
-        run: |
-          sudo apt update -y
-          sudo apt-get install -y git bash openssl curl zip linux-headers-generic
-          sudo add-apt-repository multiverse 
-          curl https://download.virtualbox.org/virtualbox/6.1.34/virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb --output virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb
-          sudo apt install -y libqt5core5a libqt5gui5 libqt5opengl5 libqt5printsupport5 libqt5widgets5 libqt5x11extras5 libsdl1.2debian libopus0 virtualbox-guest-x11
-          sudo dpkg -i ./virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb
-          sudo apt-get update -y
-          curl https://download.virtualbox.org/virtualbox/6.1.34/Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack --output Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack
-          echo "y" | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack
-#          sudo apt install -y virtualbox
-#          sudo dpkg-reconfigure virtualbox-dkms
-#          sudo apt update -y
-#          sudo apt install virtualbox-ext-pack
 
       # install packer
       - name: Install Packer
@@ -46,6 +25,27 @@ jobs:
           sudo apt-get update && sudo apt-get -y install packer
           sudo dpkg-reconfigure packer
           sudo ldconfig
+
+      # download iso
+      - name: Download ISO
+        run: |
+          curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 > target_iso.lst
+          curl -L http://cdimage.kali.org/kali-images/kali-weekly/$(cat target_iso.lst) --output $(cat target_iso.lst)
+          file $(cat target_iso.lst)
+          sudo apt -y install coreutils
+
+      # fix backwards incompatibilities in template
+      - name: Fix Template
+        run: sudo packer fix templates/kali.json
+
+      # validate templates
+      - name: Validate Template
+        run: |
+          sudo packer validate -only=virtualbox-iso -var iso_url=$(cat target_iso.lst) \
+          -var iso_checksum=$(sha256sum $(cat target_iso.lst) | cut -d " " -f 1) \
+          -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} \
+          -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json \
+          -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json
 
       # fix backwards incompatibilities in template
 #      - name: Fix Template
@@ -61,6 +61,58 @@ jobs:
  #         command: validate
  #         arguments: -syntax-only
  #         target: templates/kali.json
+
+  builder:
+    runs-on: ubuntu-latest
+    needs: valdiate_template
+    name: aws_builder
+    
+    steps:
+      # Log into AWS Console
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Save github action key
+      - name: Save github action key
+        run: |
+          echo "${{ secrets.AWS_EC2_INSTANCE_KEY }}" >> github_actions.pem
+
+      # Create instance using AWS Console
+      # ami-0b7dcd6e6fd797935
+      - name: Create instance
+        run: |
+          export RUNNER_PUBLIC_IP=`curl icanhazip.com`
+          export AWS_SECURITY_GROUP_ID=`aws ec2 create-security-group --group-name GithubActionsPacker --description "Bespoke security group to grant access from github action runner to instance" | grep -oE 'sg-.*' | tr -d '"'`
+          cat $AWS_SECURITY_GROUP_ID > security_group_id.txt
+          aws ec2 authorize-security-group-ingress --group-id $AWS_SECURITY_GROUP_ID --protocol tcp --port 22 --cidr $RUNNER_PUBLIC_IP/32
+          aws ec2 run-instances --image-id ${{ secrets.AWS_IMAGE_ID }} --instance-type ${{ secrets.AWS_INSTANCE_TYPE }} --key-name ${{ secrets.AWS_EC2_INSTANCE_NAME }} --security-groups $AWS_SECURITY_GROUP_ID --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=GithubActions_Packer_Build}]' |grep InstanceId |cut -d ":" -f2 | tr -d '"' | tr -d ',' | grep -oE 'i-*.*' >> instance_id.txt
+          aws ec2 describe-instances --instance-ids $( echo instance_id.txt ) |grep PublicIpAddress | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' >> instance_public_ip.txt
+
+      # Terminate instance
+      - name: Terminate instance
+        run: | 
+          aws ec2 terminate-instances --instance-ids $( cat instance_id.txt )
+          
+      - name: Delete Security Group
+        run: |
+          aws delete-security-group --group-id $( cat security_group_id.txt )
+
+      # install virtualbox
+#      - name: Install Virtualbox
+#        run: |
+#          sudo apt update -y
+#          sudo apt-get install -y git bash openssl curl zip linux-headers-generic
+#          sudo add-apt-repository multiverse 
+#          curl https://download.virtualbox.org/virtualbox/6.1.34/virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb --output virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb
+#          sudo apt install -y libqt5core5a libqt5gui5 libqt5opengl5 libqt5printsupport5 libqt5widgets5 libqt5x11extras5 libsdl1.2debian libopus0 virtualbox-guest-x11
+#          sudo dpkg -i ./virtualbox-6.1_6.1.34-150636.1~Ubuntu~eoan_amd64.deb
+#          sudo apt-get update -y
+#          curl https://download.virtualbox.org/virtualbox/6.1.34/Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack --output Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack
+#          echo "y" | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-6.1.34.vbox-extpack
 
        # build artifact
 #      - name: Build Artifact
@@ -83,26 +135,9 @@ jobs:
 #        env:
 #          PACKER_LOG: 1
 
-      # download iso
-      - name: Download ISO
-        run: |
-          curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 > target_iso.lst
-          curl -L http://cdimage.kali.org/kali-images/kali-weekly/$(cat target_iso.lst) --output $(cat target_iso.lst)
-          file $(cat target_iso.lst)
-          sudo apt -y install coreutils
-  
-      # fix backwards incompatibilities in template
-      - name: Fix Template
-        run: sudo packer fix templates/kali.json
-
-      # validate templates
-      - name: Validate Template
-        run: |
-          sudo packer validate -only=virtualbox-iso -var iso_url=$(cat target_iso.lst) -var iso_checksum=$(sha256sum $(cat target_iso.lst) | cut -d " " -f 1) -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json
-
       # build artifact
-      - name: Build Artifact
-        run: |
-          sudo PACKER_LOG=1 packer build -color=false -on-error=abort -only=virtualbox-iso -var iso_url=$(cat target_iso.lst) -var iso_checksum=$(sha256sum $(cat target_iso.lst) | cut -d " " -f 1) -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json
+#      - name: Build Artifact
+#        run: |
+#          sudo PACKER_LOG=1 packer build -color=false -on-error=abort -only=virtualbox-iso -var iso_url=$(cat target_iso.lst) -var iso_checksum=$(sha256sum $(cat target_iso.lst) | cut -d " " -f 1) -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile templates/kali.json
 
       # additional steps to process artifacts
