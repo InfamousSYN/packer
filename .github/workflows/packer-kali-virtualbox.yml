@@ -95,7 +95,7 @@ jobs:
 
       - name: Pause builder
         run: |
-          sleep(60)
+          sleep 60
 
       - name: Configure Instance
         run: |
@@ -117,7 +117,7 @@ jobs:
 
       - name: Pause builder
         run: |
-          sleep(60)
+          sleep 60
 
       - name: Delete Security Group
         run: |
