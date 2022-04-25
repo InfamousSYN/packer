@@ -124,8 +124,8 @@ jobs:
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 > target_iso.lst"
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "cat target_iso.lst"
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "ls -lh; pwd"
-          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "curl -L http://cdimage.kali.org/kali-images/kali-weekly/$(cat target_iso.lst) --output $(cat target_iso.lst)"
-          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "file $(cat target_iso.lst)"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "curl -L http://cdimage.kali.org/kali-images/kali-weekly/$(cat /home/ubuntu/target_iso.lst) --output $(cat /home/ubuntu/target_iso.lst)"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "file $(cat /home/ubuntu/target_iso.lst)"
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt -y install coreutils"
 
       - name: Instance Configuration - Checkout packer repo
