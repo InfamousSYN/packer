@@ -92,6 +92,19 @@ jobs:
           aws ec2 run-instances --image-id ${{ secrets.AWS_IMAGE_ID }} --instance-type ${{ secrets.AWS_INSTANCE_TYPE }} --key-name ${{ secrets.AWS_EC2_INSTANCE_NAME }} --security-group-ids $AWS_SECURITY_GROUP_ID --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=GithubActions_Packer_Build}]' |grep InstanceId |cut -d ":" -f2 | tr -d '"' | tr -d ',' | grep -oE 'i-*.*' >> instance_id.txt
           aws ec2 describe-instances --instance-ids $( cat instance_id.txt ) |grep PublicIpAddress | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' >> instance_public_ip.txt
 
+      - name: Configure Instance
+        run: |
+          ssh -l ubuntu `cat instance_public_ip.txt` "sudo whoami"
+#          ssh -l ubuntu `cat instance_public_ip.txt` sudo curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+#          ssh -l ubuntu `cat instance_public_ip.txt` sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+#          ssh -l ubuntu `cat instance_public_ip.txt` sudo apt-get update && sudo apt-get -y install packer
+#          ssh -l ubuntu `cat instance_public_ip.txt` sudo dpkg-reconfigure packer
+#          ssh -l ubuntu `cat instance_public_ip.txt` sudo ldconfig
+#          ssh -l ubuntu `cat instance_public_ip.txt` curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 > target_iso.lst
+#          ssh -l ubuntu `cat instance_public_ip.txt` curl -L http://cdimage.kali.org/kali-images/kali-weekly/$(cat target_iso.lst) --output $(cat target_iso.lst)
+#          ssh -l ubuntu `cat instance_public_ip.txt` file $(cat target_iso.lst)
+#          ssh -l ubuntu `cat instance_public_ip.txt` sudo apt -y install coreutils
+
       # Terminate instance
       - name: Terminate instance
         run: | 
@@ -99,6 +112,7 @@ jobs:
           
       - name: Delete Security Group
         run: |
+          sleep(30)
           aws ec2 delete-security-group --group-id $( cat security_group_id.txt )
 
       # install virtualbox
