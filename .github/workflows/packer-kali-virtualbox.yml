@@ -93,6 +93,10 @@ jobs:
           aws ec2 run-instances --image-id ${{ secrets.AWS_IMAGE_ID }} --instance-type ${{ secrets.AWS_INSTANCE_TYPE }} --key-name ${{ secrets.AWS_EC2_INSTANCE_NAME }} --security-group-ids $AWS_SECURITY_GROUP_ID --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=GithubActions_Packer_Build}]' |grep InstanceId |cut -d ":" -f2 | tr -d '"' | tr -d ',' | grep -oE 'i-*.*' >> instance_id.txt
           aws ec2 describe-instances --instance-ids $( cat instance_id.txt ) |grep PublicIpAddress | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' >> instance_public_ip.txt
 
+      - name: Pause builder
+        run: |
+          sleep(60)
+
       - name: Configure Instance
         run: |
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo whoami"
@@ -110,10 +114,13 @@ jobs:
       - name: Terminate instance
         run: | 
           aws ec2 terminate-instances --instance-ids $( cat instance_id.txt )
-          
-      - name: Delete Security Group
+
+      - name: Pause builder
         run: |
           sleep(60)
+
+      - name: Delete Security Group
+        run: |
           aws ec2 delete-security-group --group-id $( cat security_group_id.txt )
 
       # install virtualbox
