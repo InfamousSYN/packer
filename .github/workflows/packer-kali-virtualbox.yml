@@ -122,7 +122,7 @@ jobs:
         run: |
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "sudo apt -y install coreutils"
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem "curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 > target_iso.lst"
-          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -o "ClientAliveInterval=600" -o "ClientAliveCountMax=3" -i packer/github_actions.pem 'bash -c '"'"'curl -L http://cdimage.kali.org/kali-images/kali-weekly/"$(cat target_iso.lst)" --output "$(cat target_iso.lst)"'"'"
+          ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i packer/github_actions.pem 'bash -c '"'"'curl -L http://cdimage.kali.org/kali-images/kali-weekly/"$(cat target_iso.lst)" --output "$(cat target_iso.lst)"'"'"
           ssh -l ubuntu `cat instance_public_ip.txt` -o "StrictHostKeyChecking=no" -i github_actions.pem 'bash -c '"'"'file "$(cat target_iso.lst)"'"'"
 
       - name: Instance Configuration - Checkout packer repo
