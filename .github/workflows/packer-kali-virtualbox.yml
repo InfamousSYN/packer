@@ -47,15 +47,7 @@ jobs:
         with:
           command: build
           arguments: |
-            -color=false -on-error=abort \
-            -only=virtualbox-iso \
-            -var iso_url=`echo $ISO_URL` \
-            -var iso_checksum=file:https://mirror.lagoon.nc/kali-images/kali-weekly/SHA256SUMS \
-            -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} \
-            -var account_key=${{ secrets.VAGRANTCLOUD_API }} \
-            -var box_version=1.0.0 \
-            -var metadata=include/vagrant/metadta/virtualbox/metadata.json \
-            -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile \
+            -color=false -on-error=abort -only=virtualbox-iso -var iso_url=$ISO_URL -var iso_checksum=file:https://mirror.lagoon.nc/kali-images/kali-weekly/SHA256SUMS -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile
           target: templates/kali.json
         env:
           PACKER_LOG: 1
