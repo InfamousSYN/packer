@@ -53,8 +53,7 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       - name: provision compute instance
-        run: |
-          doctl \
+        run: doctl \
           compute \
           droplet \
           create \
