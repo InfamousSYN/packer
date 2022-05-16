@@ -60,7 +60,7 @@ jobs:
            create ${{ env.name }} \
            --size ${{ env.size_slug }} \
            --image ${{ env.image_slug }} \
-           --ssh-keys ${{ secrets.DIGITIALOCEANS_SSH_KEY }} \
+           --ssh-keys ${{ secrets.DIGITIALOCEANS_SSH_KEY_FINGERPRINT }} \
            --region ${{ env.region_slug }} \
            --tag-names ${{ env.tags }}
         env:
@@ -69,5 +69,16 @@ jobs:
           image_slug: 'ubuntu-20-04-x64'
           region_slug: 'nyc1'
           tags: 'github_actions,packer'
-          
+
+      - name: set instance id environment variable
+        run: |
+          echo "DROPLET_ID=$( doctl compute droplet list --tag-name github_actions --output json | grep -E '^(\s){4}\"id\"' |awk '{$1=$1};1' |cut -d \" \" -f2 | cut -d \",\" -f1 )" >> $GITHUB_ENV
+
+      - name: connect to instance
+        run: |
+          cat ${{ secrets.DIGITIALOCEANS_SSH_KEY }} >> ${{ env.DROPLET_ID }}.pem
+          chmod 600 ${{ env.DROPLET_ID }}.pem
+          doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
+           --ssh-command "whoami; exit"
+
       # additional steps to process artifacts
