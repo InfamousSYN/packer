@@ -67,7 +67,7 @@ jobs:
           name: github-actions-packer
           size_slug: s-1vcpu-2gb
           image_slug: ubuntu-20-04-x64
-          region_slug: nyc1
+          region_slug: NYC1
           tags: |
             'github_actions','packer'
           
