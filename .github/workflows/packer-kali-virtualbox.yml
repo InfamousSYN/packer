@@ -57,17 +57,18 @@ jobs:
           doctl \
           compute \
           droplet \
-          create {{ env.name }} \
+          create \
           --size {{ env.size_slug }} \
           --image {{ env.image_slug }} \
           --ssh-keys {{ secrets.DIGITIALOCEANS_SSH_KEY }} \
           --region {{ env.region_slug }} \
-          --tag-names {{ env.tags }}
+          --tag-names {{ env.tags }} \
+          {{ env.name }}
         env:
           name: github-actions-packer
           size_slug: s-1vcpu-2gb
           image_slug: ubuntu-20-04-x64
-          region_slug: NYC1
+          region_slug: nyc3
           tags: |
             'github_actions','packer'
           
