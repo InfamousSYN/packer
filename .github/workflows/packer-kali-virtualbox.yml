@@ -60,7 +60,7 @@ jobs:
           create {{ env.name }} \
           --size {{ env.size_slug }} \
           --image {{ env.image_slug }} \
-          --ssh-keys {{secrets.DIGITIALOCEANS_SSH_KEY }} \
+          --ssh-keys {{ secrets.DIGITIALOCEANS_SSH_KEY }} \
           --region {{ env.region_slug }} \
           --tag-names {{ env.tags }}
         env:
@@ -68,6 +68,7 @@ jobs:
           size_slug: s-1vcpu-2gb
           image_slug: ubuntu-20-04-x64
           region_slug: nyc1
-          tags: 'github_actions','packer'
+          tags: |
+            'github_actions','packer'
           
       # additional steps to process artifacts
