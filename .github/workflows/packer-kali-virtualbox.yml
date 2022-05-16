@@ -60,8 +60,8 @@ jobs:
           create {{ env.name }} \
           --size {{ env.size_slug }} \
           --image {{ env.image_slug }} \
-          --region {{ env.region_slug }} \
           --ssh-keys {{secrets.DIGITIALOCEANS_SSH_KEY }} \
+          --region {{ env.region_slug }} \
           --tag-names {{ env.tags }}
         env:
           name: github-actions-packer
