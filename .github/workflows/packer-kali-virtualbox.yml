@@ -72,7 +72,7 @@ jobs:
 
       - name: set instance id environment variable
         run: |
-          echo "DROPLET_ID=$( doctl compute droplet list --tag-name github_actions --output json | grep -E '^(\s){4}\"id\"' |awk '{$1=$1};1' |cut -d ' ' -f2 | cut -d ',' -f1 )" >> $GITHUB_ENV
+          echo DROPLET_ID=$( doctl compute droplet list --tag-name github_actions --output json | grep -E '^(\s){4}\"id\"' | awk '{$1=$1};1' |cut -d ' ' -f2 | cut -d ',' -f1 ) >> $GITHUB_ENV
 
       - name: wait 60
         run: |
