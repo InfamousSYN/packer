@@ -52,7 +52,7 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: provision compute instance
+      - name: provision droplet
         run: |
           doctl \
            compute \
@@ -78,14 +78,27 @@ jobs:
         run: |
           sleep 60
 
-      - name: connect to instance
+      - name: jq set DROPLET_IP
+        uses: sergeysova/jq-action@v2
+        with:
+          cmd: echo DROPLET_IP=$( doctl compute droplet get ${{ env.DROPLET_ID }} --output json | jq '.[0].networks.v4[0].ip_address' ) >> $GITHUB_ENV
+
+      - name: connect to droplet for first time
         run: |
           echo "${{ secrets.DIGITIALOCEANS_SSH_KEY }}" >> ${{ env.DROPLET_ID }}.pem
           chmod 600 ${{ env.DROPLET_ID }}.pem
+          ssh \
+           -l root \
+           ${{ env.DROPLET_IP }} \
+           -o "StrictHostKeyChecking=no" \
+           -i ${{ env.DROPLET_ID }}.pem
+
+      - name: configure droplet
+        run: |
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "whoami; exit"
 
-      - name: decommission instance
+      - name: decommission droplet
         run: |
           sleep 3
 
