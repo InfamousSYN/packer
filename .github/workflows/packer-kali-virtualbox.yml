@@ -79,9 +79,9 @@ jobs:
           sleep 60
 
       - name: jq set DROPLET_IP
-        uses: sergeysova/jq-action@v2
-        with:
-          cmd: echo DROPLET_IP=$( doctl compute droplet get ${{ env.DROPLET_ID }} --output json | jq '.[0].networks.v4[0].ip_address' ) >> $GITHUB_ENV
+        run: |
+          sudo apt -y jq
+          echo DROPLET_IP=$( doctl compute droplet get ${{ env.DROPLET_ID }} --output json | jq '.[0].networks.v4[0].ip_address' ) >> $GITHUB_ENV
 
       - name: connect to droplet for first time
         run: |
