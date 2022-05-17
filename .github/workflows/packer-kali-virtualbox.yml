@@ -85,4 +85,8 @@ jobs:
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "whoami; exit"
 
+      - name: decommission instance
+        run: |
+          sleep 3
+
       # additional steps to process artifacts
