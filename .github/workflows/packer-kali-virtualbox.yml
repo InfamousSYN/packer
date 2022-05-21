@@ -109,7 +109,7 @@ jobs:
           echo "Installing virtualbox"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso --fix-missing --assume-yes --quiet"
-        env: |
+        env:
           github_packer_url: https://github.com/InfamousSYN/packer
 
       - name: decommission droplet
