@@ -100,17 +100,26 @@ jobs:
         run: |
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "git clone ${{ env.github_packer_url }}"
+
           echo "Performing APT update"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "apt update"
+
           echo "Installing packer"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "apt -y install packer"
+
           echo "Installing virtualbox"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
-           --ssh-command "apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso --fix-missing --assume-yes --quiet"
+           --ssh-command "apt --fix-missing --assume-yes --quiet install virtualbox virtualbox-dkms virtualbox-guest-additions-iso"
+          echo VIRTUALBOX_LATEST=$( curl https://download.virtualbox.org/virtualbox/LATEST-STABLE.TXT ) >> $GITHUB_ENV
+          doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
+           --ssh-command "wget ${{ env.virtualbox_url }}/${{ env.VIRTUALBOX_LATEST}}/Oracle_VM_VirtualBox_Extension_Pack-${{ env.VIRTUALBOX_LATEST}}.vbox-extpack"
+          doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
+           --ssh-command "echo 'y' | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-${{ env.VIRTUALBOX_LATEST}}.vbox-extpack"
         env:
           github_packer_url: https://github.com/InfamousSYN/packer
+          virtualbox_url: https://download.virtualbox.org/virtualbox
 
       - name: decommission droplet
         run: |
