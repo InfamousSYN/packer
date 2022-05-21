@@ -80,7 +80,7 @@ jobs:
 
       - name: jq set DROPLET_IP
         run: |
-          sudo apt -y jq
+          sudo apt -y install jq
           echo DROPLET_IP=$( doctl compute droplet get ${{ env.DROPLET_ID }} --output json | jq '.[0].networks.v4[0].ip_address' ) >> $GITHUB_ENV
 
       - name: connect to droplet for first time
