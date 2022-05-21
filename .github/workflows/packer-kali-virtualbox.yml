@@ -99,7 +99,18 @@ jobs:
       - name: configure droplet
         run: |
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
-           --ssh-command "whoami; exit"
+           --ssh-command "git clone ${{ env.github_packer_url }}"
+          echo "Performing APT update"
+          doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
+           --ssh-command "apt update"
+          echo "Installing packer"
+          doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
+           --ssh-command "apt -y install packer"
+          echo "Installing virtualbox"
+          doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
+           --ssh-command "apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso --fix-missing --assume-yes --quiet"
+        env: |
+          github_packer_url: https://github.com/InfamousSYN/packer
 
       - name: decommission droplet
         run: |
