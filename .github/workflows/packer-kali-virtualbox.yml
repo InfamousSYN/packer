@@ -158,18 +158,17 @@ jobs:
            --ssh-command "cd packer; packer fix templates/kali.json"
 
       # fix backwards incompatibilities in template
-      - name: Droplet Fix Template
+      - name: Droplet Validate Template
         run: |
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "cd packer; \
             packer validate -only=virtualbox-iso \
-             -var iso_url=\"http://cdimage.kali.org/kali-images/kali-weekly/$( curl http://cdimage.kali.org/kali-images/kali-weekly/ \
-              |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 )\"  \
-             -var iso_checksum=\"file:http://cdimage.kali.org/kali-images/kali-weekly/SHA256SUMS\" \
+             -var iso_url=http://cdimage.kali.org/kali-images/kali-weekly/$( curl http://cdimage.kali.org/kali-images/kali-weekly/ |grep -oE 'kali-linux-[0-9]{1,4}-W[0-9]{1,2}-installer-amd64.iso'| head -n 1 )  \
+             -var iso_checksum=file:http://cdimage.kali.org/kali-images/kali-weekly/SHA256SUMS \
              -var account_name=${{ secrets.VAGRANTCLOUD_USERNAME }} -var account_key=${{ secrets.VAGRANTCLOUD_API }} \
              -var box_version=1.0.0 -var metadata=include/vagrant/metadta/virtualbox/metadata.json \
              -var vagrantfile=include/vagrant/Vagrantfile/virtualbox/linux/Vagrantfile \
-             templates/kali.json
+             templates/kali.json"
 
       - name: decommission droplet
         run: |
