@@ -97,32 +97,34 @@ jobs:
            -i ${{ env.DROPLET_ID }}.pem \
            whoami
 
-      - name: configure droplet
+      - name: git cloning packer repository
         run: |
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "git clone ${{ env.github_packer_url }}"
 
-          echo "Performing APT update"
+      - name: Performing APT update
+        run: |
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "sleep 30; apt update"
 
-          echo "Installing packer"
+      - name: Installing packer
+        run: |
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "apt -y install packer"
 
-          echo "Installing virtualbox"
+      - name: Installing virtualbox
+        run: |
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "apt --fix-missing --assume-yes --quiet install virtualbox virtualbox-dkms virtualbox-guest-additions-iso"
           sleep 30
-          echo "curl ${{ env.virtualbox_url }}/LATEST-STABLE.TXT"
+
+      - name: Installing virtualbox-extpack
+        run: |
           echo VBOX_LATEST=$( curl ${{ env.virtualbox_url }}/LATEST-STABLE.TXT ) >> $GITHUB_ENV
-          echo $GITHUB_ENV
-          echo "printing latest virtualbox"
-          echo ${{ env.VBOX_LATEST }}
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
-           --ssh-command wget ${{ env.virtualbox_url }}/${{ env.VBOX_LATEST }}/Oracle_VM_VirtualBox_Extension_Pack-${{ env.VBOX_LATEST }}.vbox-extpack
+           --ssh-command "$(wget ${{ env.virtualbox_url }}/${{ env.VBOX_LATEST }}/Oracle_VM_VirtualBox_Extension_Pack-${{ env.VBOX_LATEST }}.vbox-extpack)"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
-           --ssh-command echo 'y' | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-${{ env.VBOX_LATEST }}.vbox-extpack
+           --ssh-command "$(echo 'y' | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-${{ env.VBOX_LATEST }}.vbox-extpack)"
         env:
           github_packer_url: https://github.com/InfamousSYN/packer
           virtualbox_url: https://download.virtualbox.org/virtualbox
