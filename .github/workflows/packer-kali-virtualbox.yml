@@ -141,9 +141,9 @@ jobs:
       - name: Installing virtualbox-extpack
         run: |
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
-           --ssh-command "$(wget ${{ env.virtualbox_url }}/${{ env.VBOX_LATEST }}/Oracle_VM_VirtualBox_Extension_Pack-${{ env.VBOX_LATEST }}.vbox-extpack)"
+           --ssh-command "wget ${{ env.virtualbox_url }}/${{ env.VBOX_LATEST }}/Oracle_VM_VirtualBox_Extension_Pack-${{ env.VBOX_LATEST }}.vbox-extpack"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
-           --ssh-command "$(echo 'y' | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-${{ env.VBOX_LATEST }}.vbox-extpack)"
+           --ssh-command "echo 'y' | vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-${{ env.VBOX_LATEST }}.vbox-extpack"
         env:
           virtualbox_url: https://download.virtualbox.org/virtualbox
 
