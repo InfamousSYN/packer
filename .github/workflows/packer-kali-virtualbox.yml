@@ -94,7 +94,12 @@ jobs:
            -l root \
            ${{ env.DROPLET_IP }} \
            -o "StrictHostKeyChecking=no" \
-           -i ${{ env.DROPLET_ID }}.pem
+           -i ${{ env.DROPLET_ID }}.pem \
+           'rm /etc/apt/apt.conf.d/20auto-upgrades
+           echo 'APT::Periodic::Update-Package-Lists "0";
+           APT::Periodic::Download-Upgradeable-Packages "0";
+           APT::Periodic::AutocleanInterval "0";
+           APT::Periodic::Unattended-Upgrade "0";' > /etc/apt/apt.conf.d/20auto-upgrades
 
       - name: configure droplet
         run: |
@@ -103,7 +108,7 @@ jobs:
 
           echo "Performing APT update"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
-           --ssh-command "apt update"
+           --ssh-command "sleep 30; apt update"
 
           echo "Installing packer"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
