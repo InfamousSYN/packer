@@ -114,12 +114,14 @@ jobs:
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "apt --fix-missing --assume-yes --quiet install virtualbox virtualbox-dkms virtualbox-guest-additions-iso"
           echo VIRTUALBOX_LATEST=$( curl https://download.virtualbox.org/virtualbox/LATEST-STABLE.TXT ) >> $GITHUB_ENV
-          env
-          echo ${{ VIRTUALBOX_LATEST }}
+          echo env
+          echo $GITHUB_ENV
+          echo "printing latest virtualbox"
+          echo ${{ env.VIRTUALBOX_LATEST }}
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
-           --ssh-command "wget ${{ env.virtualbox_url }}/${{ VIRTUALBOX_LATEST }}/Oracle_VM_VirtualBox_Extension_Pack-${{ VIRTUALBOX_LATEST }}.vbox-extpack"
+           --ssh-command "wget ${{ env.virtualbox_url }}/$VIRTUALBOX_LATEST/Oracle_VM_VirtualBox_Extension_Pack-$VIRTUALBOX_LATEST.vbox-extpack"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
-           --ssh-command "echo 'y' | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-${{ VIRTUALBOX_LATEST }}.vbox-extpack"
+           --ssh-command "echo 'y' | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-$VIRTUALBOX_LATEST.vbox-extpack"
         env:
           github_packer_url: https://github.com/InfamousSYN/packer
           virtualbox_url: https://download.virtualbox.org/virtualbox
