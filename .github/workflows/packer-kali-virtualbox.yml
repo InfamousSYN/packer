@@ -115,6 +115,8 @@ jobs:
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "echo 'export VIRTUALBOX_LATEST=$( curl https://download.virtualbox.org/virtualbox/LATEST-STABLE.TXT )' >> ~/.bash_profile"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
+           --ssh-command "echo $VIRTUALBOX_LATEST"
+          doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "wget ${{ env.virtualbox_url }}/$( echo $VIRTUALBOX_LATEST )/Oracle_VM_VirtualBox_Extension_Pack-$( echo $VIRTUALBOX_LATEST ).vbox-extpack"
           doctl compute ssh ${{ env.DROPLET_ID }} --ssh-key-path ${{ env.DROPLET_ID }}.pem \
            --ssh-command "echo 'y' | sudo vboxmanage extpack install ./Oracle_VM_VirtualBox_Extension_Pack-$( echo $VIRTUALBOX_LATEST ).vbox-extpack"
